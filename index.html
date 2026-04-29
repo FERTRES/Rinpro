@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Identity Shift Tool</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            background: #0a0a0a;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background: #111;
+            border: 1px solid #2a6f3f;
+            border-radius: 12px;
+            padding: 30px;
+            width: 100%;
+            max-width: 550px;
+            box-shadow: 0 0 12px rgba(50,200,100,0.2);
+        }
+        h2 {
+            color: #3aa86a;
+            text-align: center;
+            margin-top: 0;
+            letter-spacing: 2px;
+        }
+        label {
+            display: block;
+            margin-top: 18px;
+            margin-bottom: 6px;
+            color: #6fbf8f;
+            font-weight: bold;
+        }
+        input, textarea, select {
+            width: 100%;
+            background: #1f1f1f;
+            border: 1px solid #2a6f3f;
+            padding: 10px;
+            color: #bfdfcf;
+            font-family: monospace;
+            border-radius: 6px;
+        }
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        button {
+            margin-top: 28px;
+            background: #0a2a1a;
+            color: #6fbf8f;
+            border: 1px solid #3aa86a;
+            padding: 12px;
+            width: 100%;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: monospace;
+            font-size: 1rem;
+            transition: 0.2s;
+            border-radius: 6px;
+        }
+        button:hover {
+            background: #1a3a2a;
+            color: #8fdfaf;
+            border-color: #5aca8a;
+        }
+        .result {
+            margin-top: 25px;
+            background: #0d1f15;
+            border-left: 5px solid #3aa86a;
+            padding: 15px;
+            word-break: break-all;
+            border-radius: 4px;
+        }
+        .result span {
+            color: #5aca8a;
+        }
+        .footer {
+            font-size: 0.7rem;
+            text-align: center;
+            margin-top: 20px;
+            color: #2a5a3a;
+        }
+        .preview-box {
+            background: #0a1a0f;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>🔄 IDENTITY SHIFT TOOL 🔄</h2>
+    <p style="color:#5a9a7a; font-size:0.8rem; text-align:center;">Ubah nama. Ubah peran. Tanpa jejak.</p>
+
+    <label>📛 Nama asli (karakter roleplay lo)</label>
+    <input type="text" id="originalName" placeholder="Contoh: Ronix" value="Ronix">
+
+    <label>✨ Nama target (panggilan baru lo)</label>
+    <input type="text" id="targetName" placeholder="Contoh: Roxter" value="Roxter">
+
+    <label>🎭 Mood / gaya perubahan (opsional)</label>
+    <textarea id="mood" placeholder="Contoh: dark, mysterious, rebel, ghost, shadow...">dark rebel</textarea>
+
+    <label>⚙️ Mode transformasi</label>
+    <select id="mode">
+        <option value="strict">Strict: Ronix → Roxter (langsung)</option>
+        <option value="creative">Creative: tambah embel-embel roleplay</option>
+        <option value="hybrid">Hybrid: gabung prompt mood</option>
+    </select>
+
+    <button id="shiftBtn">⟳ SHIFT IDENTITY ⟳</button>
+
+    <div class="result" id="resultArea">
+        <span>🏷️ Nama baru:</span> <span id="newIdentity">—</span>
+    </div>
+    <div class="footer">
+        Tidak ada penyimpanan. Transformasi murni di sisi server.
+    </div>
+</div>
+
+<script>
+    const shiftBtn = document.getElementById('shiftBtn');
+    const originalName = document.getElementById('originalName');
+    const targetName = document.getElementById('targetName');
+    const moodInput = document.getElementById('mood');
+    const modeSelect = document.getElementById('mode');
+    const newIdentitySpan = document.getElementById('newIdentity');
+
+    shiftBtn.addEventListener('click', async () => {
+        const original = originalName.value.trim();
+        const target = targetName.value.trim();
+        const mood = moodInput.value.trim();
+        const mode = modeSelect.value;
+
+        if (!original || !target) {
+            newIdentitySpan.innerText = '[ERROR] Isi nama asli dan target!';
+            return;
+        }
+
+        newIdentitySpan.innerText = '[PROCESSING...]';
+
+        try {
+            const response = await fetch('/api/shift', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ original, target, mood, mode })
+            });
+            const data = await response.json();
+            if (data.newName) {
+                newIdentitySpan.innerText = data.newName;
+            } else {
+                newIdentitySpan.innerText = '[ERROR] ' + (data.error || 'Gagal shift');
+            }
+        } catch (err) {
+            newIdentitySpan.innerText = '[ERROR] Server offline';
+        }
+    });
+</script>
+</body>
+</html>
